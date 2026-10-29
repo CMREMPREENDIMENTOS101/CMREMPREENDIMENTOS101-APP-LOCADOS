@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Locados CMR</title>
+<meta name="theme-color" content="#C8102E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Locados CMR">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script>try{var t=localStorage.getItem('cmr_locados_tema');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<link rel="manifest" href="/locados.webmanifest">
+<link rel="icon" href="/locados-icon-192.png">
+<link rel="apple-touch-icon" href="/locados-icon-180.png">
+<style>
+:root{
+  --red:#C8102E;--red-dark:#9e0c24;--red-soft:#fbe7ea;
+  --bg:#f2f2f4;--card:#ffffff;--text:#151515;--muted:#6b6b72;--line:#e3e3e8;
+  --ok:#0f8a55;--ok-soft:#e3f5ec;--off:#b0452f;--off-soft:#fbeae5;--warn:#9a6400;--warn-soft:#fff4d6;--chip:#f0f0f3;
+  --shadow:0 1px 2px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.04);
+}
+/* tema: automático segue o celular; data-theme="light"/"dark" (engrenagem ⚙) força */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f0f10;--card:#1a1a1c;--text:#ececef;--muted:#9a9aa3;--line:#2c2c30;
+    --red-soft:#3a1219;--ok:#35c486;--ok-soft:#10301f;--off:#ff8a70;--off-soft:#3a1d15;--warn:#f4c95d;--warn-soft:#3a2f0f;--chip:#26262a;
+    --shadow:none;--previa:#025c4c;--previa-txt:#e9edef;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f0f10;--card:#1a1a1c;--text:#ececef;--muted:#9a9aa3;--line:#2c2c30;
+  --red-soft:#3a1219;--ok:#35c486;--ok-soft:#10301f;--off:#ff8a70;--off-soft:#3a1d15;--warn:#f4c95d;--warn-soft:#3a2f0f;--chip:#26262a;
+  --shadow:none;--previa:#025c4c;--previa-txt:#e9edef;color-scheme:dark;
+}
+:root[data-theme="light"]{color-scheme:light}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+/* topo */
+.top{position:sticky;top:0;z-index:20;background:var(--red);color:#fff;
+  padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;display:flex;align-items:center;gap:10px}
+.top h1{font-size:18px;margin:0;letter-spacing:.3px;flex:1}
+.top h1 small{display:block;font-size:11px;font-weight:500;opacity:.85;letter-spacing:.2px}
+.top .ic{background:rgba(255,255,255,.16);border:0;color:#fff;border-radius:10px;height:36px;min-width:36px;padding:0 10px;font-size:13px}
+.tabs{display:flex;background:var(--red-dark)}
+.tabs button{flex:1;background:none;border:0;color:rgba(255,255,255,.7);padding:10px 0;font-weight:600;font-size:14px;border-bottom:3px solid transparent}
+.tabs button.on{color:#fff;border-bottom-color:#fff}
+
+main{max-width:560px;margin:0 auto;padding:12px 12px calc(96px + env(safe-area-inset-bottom))}
+.card{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:14px;margin-bottom:12px;border:1px solid var(--line)}
+.lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.row{display:flex;gap:8px;align-items:flex-end}
+.row>*{flex:1;min-width:0}
+.field{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:11px 12px;min-height:44px}
+select.field{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:30px}
+textarea.field{min-height:70px;resize:vertical}
+.mt{margin-top:10px}
+
+.contagem{display:flex;gap:8px;margin-bottom:10px}
+.contagem div{flex:1;border-radius:12px;padding:10px 6px;text-align:center;background:var(--card);border:1px solid var(--line)}
+.contagem b{display:block;font-size:22px;line-height:1.1;font-variant-numeric:tabular-nums}
+.contagem span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+.contagem .a b{color:var(--off)}
+
+/* cartão de equipamento */
+.eq{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--ok);
+  border-radius:12px;padding:10px 10px 10px 12px;margin-bottom:8px;width:100%;text-align:left}
+.eq.prox{border-left-color:var(--warn)}
+.eq.venc{border-left-color:var(--off)}
+.eq.dev{border-left-color:var(--muted);opacity:.9}
+.einfo{flex:1;min-width:0}
+.enome{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.esub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.esit{font-size:12px;font-weight:600;color:var(--ok)}
+.eq.prox .esit{color:var(--warn)} .eq.venc .esit{color:var(--off)} .eq.dev .esit{color:var(--muted)}
+.eval{flex:none;text-align:right}
+.eval b{display:block;font-size:15px;font-variant-numeric:tabular-nums}
+.eval small{font-size:11px;color:var(--muted)}
+.qtd{font-size:10px;font-weight:700;background:var(--chip);color:var(--muted);border-radius:6px;padding:1px 5px;margin-left:4px;vertical-align:1px}
+.grupo{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 2px 6px;display:flex;justify-content:space-between}
+
+/* barra fixa */
+.barra{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--card);border-top:1px solid var(--line);
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
+.barra .in{max-width:560px;margin:0 auto;display:flex;gap:8px}
+.btn{border:0;border-radius:12px;min-height:50px;padding:0 16px;font-weight:700;font-size:15px}
+.btn.pri{background:var(--red);color:#fff;flex:1}
+.btn.zap{background:#1faa53;color:#fff;flex:1}
+.btn.sec{background:var(--chip);color:var(--text)}
+.btn.del{background:none;color:var(--off);padding:0 8px}
+
+/* folha */
+.veu{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.folha{background:var(--card);width:100%;max-width:560px;border-radius:18px 18px 0 0;max-height:92vh;display:flex;flex-direction:column;
+  padding:8px 16px calc(16px + env(safe-area-inset-bottom))}
+.folha .puxador{width:40px;height:4px;border-radius:2px;background:var(--line);margin:4px auto 10px;flex:none}
+.folha h2{font-size:17px;margin:0 0 10px}
+.folha .corpo{overflow:auto;flex:1;min-height:0}
+.folha .pe{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.resumo{background:var(--red-soft);border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px}
+.det{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:14px}
+.det span{color:var(--muted)}
+.hist{font-size:12px;color:var(--muted);border-left:2px solid var(--line);padding-left:8px;margin:4px 0}
+.previa{white-space:pre-wrap;background:var(--previa,#e7ffdb);color:var(--previa-txt,#111);border-radius:10px;padding:12px;font-size:14px;line-height:1.45}
+.seg{display:flex;background:var(--chip);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:none;border-radius:9px;padding:9px 4px;font-weight:600;font-size:13px;color:var(--muted)}
+.seg button.on{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+.sec-tit{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:18px 0 8px}
+.usu{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.usu .av{width:36px;height:36px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.usu.off .av{background:var(--muted)}
+.usu .pinfo{flex:1;min-width:0}
+.usu .pinfo b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.usu .pinfo small{color:var(--muted);font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.usu .mini{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 9px;font-size:12px;font-weight:600;flex:none}
+.tag-adm{font-size:10px;font-weight:700;background:var(--red-soft);color:var(--red);border-radius:6px;padding:1px 5px;margin-left:4px}
+.vazio{text-align:center;color:var(--muted);padding:30px 10px}
+.link{background:none;border:0;color:var(--red);font-weight:600;padding:6px 0}
+.aviso{background:var(--warn-soft);color:var(--warn);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600;margin-bottom:10px;text-align:center}
+.aviso a,.aviso button{color:inherit;background:none;border:0;padding:0;font-weight:700;text-decoration:underline}
+.inst{display:flex;align-items:center;gap:10px;background:var(--red-soft);border:1px solid var(--red);border-radius:12px;
+  padding:10px 12px;font-size:13px;font-weight:600;margin-bottom:10px}
+.inst span{flex:1}
+.inst button{border:0;background:var(--red);color:#fff;border-radius:9px;height:38px;padding:0 14px;font-weight:700;flex:none}
+.passos{counter-reset:p;padding:0;margin:6px 0 0;list-style:none}
+.passos li{counter-increment:p;position:relative;padding:8px 0 8px 34px;border-bottom:1px solid var(--line);font-size:14px}
+.passos li:before{content:counter(p);position:absolute;left:0;top:8px;width:24px;height:24px;border-radius:50%;background:var(--red);color:#fff;
+  display:grid;place-items:center;font-size:12px;font-weight:700}
+.erro{color:var(--off);font-size:13px;font-weight:600;margin-top:8px}
+.eqimg{display:grid;place-items:center;flex:none;border-radius:12px;background:var(--red-soft);color:var(--red)}
+.eqprev{display:flex;align-items:center;gap:12px;margin-top:10px;padding:10px;border:1px dashed var(--line);border-radius:14px}
+.eqprev b{display:block;font-size:14px}.eqprev small{color:var(--muted);font-size:11px}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#222;color:#fff;
+  padding:10px 16px;border-radius:10px;font-size:14px;z-index:60;max-width:90vw;text-align:center}
+
+/* fotos */
+.fotos{display:flex;flex-wrap:wrap;gap:8px}
+.foto{position:relative;width:76px;height:76px;border-radius:10px;overflow:hidden;background:var(--chip);border:0;padding:0}
+.foto img{width:100%;height:100%;object-fit:cover;display:block}
+.foto .x{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:13px;line-height:22px;padding:0}
+.add-foto{width:76px;height:76px;border-radius:10px;border:1.5px dashed var(--muted);display:grid;place-items:center;color:var(--muted);font-size:12px;font-weight:600;text-align:center;cursor:pointer;line-height:1.2}
+.foto-grande{width:100%;border-radius:10px;display:block}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="top">
+    <h1>Locados CMR<small>Controle de equipamentos locados</small></h1>
+    <button class="ic" onclick="abrirRelatorio()">📄 Relatório</button>
+    <button class="ic" onclick="abrirConfig()" title="Configurações" style="font-size:18px">⚙</button>
+  </div>
+  <nav class="tabs">
+    <button id="tab-ativos" class="on" onclick="aba('ativos')">Na obra</button>
+    <button id="tab-dev" onclick="aba('dev')">Devolvidos</button>
+  </nav>
+</header>
+
+<main>
+  <div id="banner-inst" class="inst hidden">
+    <span>📲 Instale na tela inicial para abrir como aplicativo</span>
+    <button onclick="instalar()">Instalar</button>
+  </div>
+  <div id="aviso-obras" class="aviso hidden"></div>
+  <div class="card">
+    <div class="lbl">Obra</div>
+    <select id="f-obra" class="field" onchange="render()"></select>
+    <input id="f-busca" class="field mt" type="search" placeholder="Buscar equipamento, locadora ou solicitante" oninput="render()">
+  </div>
+  <div class="contagem" id="contagem"></div>
+  <div id="lista"></div>
+</main>
+
+<div class="barra">
+  <div class="in">
+    <button class="btn sec" onclick="abrirResumo()">WhatsApp</button>
+    <button class="btn pri" onclick="abrirForm()">+ Nova locação</button>
+  </div>
+</div>
+
+<div id="veu" class="veu hidden" onclick="if(event.target===this)fecharFolha()">
+  <div class="folha" id="folha"></div>
+</div>
+
+<script>
+'use strict';
+// ════════════════════════════════════════════════════════════════
+// Locados CMR — controle simples dos equipamentos alugados por obra.
+// Obras vêm da Plataforma (GET /api/locados/obras, mesmo login); a
+// última lista fica em cache para abrir sem internet.
+// Locações no localStorage; fotos no IndexedDB (não cabem no
+// localStorage). Backup no menu ⋯ leva as duas coisas.
+// Custo = períodos cobrados × valor × qtd + frete. Período arredonda
+// para cima (diária 1d, semanal 7d, quinzenal 15d, mensal 30d).
+// ════════════════════════════════════════════════════════════════
+const CHAVE = 'cmr_locados_v1';
+const CHAVE_OBRAS = 'cmr_locados_obras';
+const PER = { dia:['Diária',1], semana:['Semanal',7], quinzena:['Quinzenal',15], mes:['Mensal',30] };
+const AVISO = 3; // dias antes da previsão para ficar amarelo
+const OUTRO = '__outro__';
+
+// Catálogo — itens com "m: true" pedem metragem.
+const CATALOGO = {
+  'Ferramentas elétricas': ['Furadeira','Furadeira de impacto','Parafusadeira','Martelete perfurador (SDS)','Martelete rompedor','Serra mármore','Serra circular','Serra tico-tico','Esmerilhadeira','Lixadeira de parede','Policorte','Plaina elétrica','Soprador térmico'],
+  'Concreto e solo': ['Betoneira 150L','Betoneira 400L','Vibrador de concreto','Régua vibratória','Compactador de solo (sapo)','Placa vibratória','Alisadora de piso (helicóptero)','Cortadora de piso'],
+  'Acesso e estrutura': ['Andaime tubular','Andaime fachadeiro','Escora metálica','Escada extensível','Plataforma elevatória','Guincho de coluna'],
+  'Energia, ar e água': ['Gerador','Compressor de ar','Motobomba','Bomba submersa','Lavadora de alta pressão'],
+  'Cabos e mangueiras (por metro)': [{n:'Extensão elétrica',m:true},{n:'Cabo elétrico',m:true},{n:'Mangueira de água',m:true},{n:'Mangueira de ar',m:true},{n:'Mangueira de nível',m:true},{n:'Mangote do vibrador',m:true}],
+  'Outros': ['Container','Banheiro químico','Caçamba','Carrinho de mão','Nível a laser','Ventilador industrial'],
+};
+const ITENS = Object.values(CATALOGO).flat().map(i => typeof i === 'string' ? {n:i} : i);
+const pedeMetro = nome => !!ITENS.find(i => i.n === nome)?.m;
+
+// Imagens ilustrativas (desenhos simples, embutidos — funcionam sem internet).
+// Cada chave é o miolo de um SVG 64×64 de traço; ICONE_DE liga o nome do catálogo à chave.
+const ICONES = {
+  furadeira:  '<rect x="6" y="18" width="34" height="16" rx="6"/><rect x="40" y="22" width="9" height="8" rx="1"/><path d="M49 26h12M16 34l-3 18h11l3-18M12 26h6"/>',
+  martelete:  '<rect x="16" y="20" width="30" height="14" rx="5"/><path d="M16 24h-4a4 4 0 0 0-4 4a4 4 0 0 0 4 4h4M46 27h14M26 34l-2 16h10l2-16"/>',
+  rompedor:   '<path d="M18 12h28M32 12v6"/><rect x="24" y="18" width="16" height="22" rx="4"/><path d="M32 40v16M26 56h12M24 26h-6v8h6M40 26h6v8h-6"/>',
+  serra:      '<circle cx="26" cy="36" r="14"/><circle cx="26" cy="36" r="3"/><circle cx="26" cy="36" r="18" stroke-dasharray="3 3"/><path d="M40 22h12a4 4 0 0 1 4 4v6h-8M48 32v14"/>',
+  marmore:    '<circle cx="24" cy="34" r="14"/><circle cx="24" cy="34" r="3"/><path d="M38 20h14a4 4 0 0 1 4 4v6h-8M48 30v12M54 46c-3 4-3 8 0 8s3-4 0-8zM44 50c-2 3-2 6 0 6s2-3 0-6z"/>',
+  ticotico:   '<rect x="8" y="22" width="38" height="12" rx="5"/><path d="M20 22v-8h20v8M16 38h22M27 38v20"/>',
+  esmeril:    '<rect x="6" y="26" width="32" height="12" rx="6"/><ellipse cx="46" cy="32" rx="5" ry="14"/><path d="M38 28v8M18 26l-4-10"/>',
+  lixadeira:  '<circle cx="48" cy="16" r="11"/><path d="M40 24L12 54M8 46l10 10M43 12l10 8"/>',
+  plaina:     '<path d="M6 40h52v8H6z"/><path d="M14 40v-9h26v9M40 31l12 6M20 31v-5h14v5"/>',
+  soprador:   '<rect x="6" y="20" width="32" height="14" rx="5"/><path d="M38 22l12-4v18l-12-4M16 34l-3 18h11l3-18M54 22c3 2 3 5 0 7M58 19c4 4 4 9 0 13"/>',
+  betoneira:  '<path d="M16 26l10-12h12l8 12-4 20H20z"/><ellipse cx="32" cy="14" rx="7" ry="3"/><path d="M24 30h16M22 38h20M26 46l-8 10M38 46l8 10M12 56h12M40 56h12"/>',
+  vibrador:   '<rect x="40" y="6" width="14" height="18" rx="4"/><path d="M47 24c0 12-20 6-20 22"/><rect x="22" y="44" width="10" height="14" rx="5"/>',
+  regua:      '<rect x="6" y="46" width="52" height="6" rx="2"/><rect x="22" y="28" width="18" height="14" rx="3"/><path d="M26 28v-8h10v8M14 46v-8l8-6M50 46v-8l-10-6"/>',
+  compactador:'<rect x="22" y="8" width="18" height="14" rx="3"/><path d="M26 22v14h10V22M40 12l14 6v22M28 44v6M36 44v6"/><rect x="18" y="36" width="26" height="8" rx="1"/>',
+  placa:      '<rect x="10" y="46" width="36" height="8" rx="2"/><rect x="16" y="28" width="22" height="16" rx="3"/><path d="M38 34l18-14M52 16l8 8"/>',
+  alisadora:  '<circle cx="28" cy="46" r="14"/><path d="M28 46l10-8M28 46l-8 10M28 46l8 10M28 46l-10-8"/><rect x="20" y="16" width="16" height="14" rx="3"/><path d="M36 22l22-10"/>',
+  cortadora:  '<circle cx="22" cy="44" r="10"/><circle cx="22" cy="44" r="2"/><rect x="14" y="16" width="24" height="14" rx="3"/><path d="M38 24h18v18"/><circle cx="48" cy="52" r="5"/>',
+  andaime:    '<path d="M12 6v52M44 6v52M12 14h32M12 30h32M12 46h32M12 14l32 16M12 30l32 16"/><path d="M8 58h8M40 58h8"/>',
+  escora:     '<path d="M18 8h28M18 56h28"/><rect x="28" y="8" width="8" height="48"/><rect x="23" y="28" width="18" height="7" rx="2"/><path d="M32 40v4M32 14v4"/>',
+  escada:     '<path d="M20 6L10 58M44 6l10 52M18.5 16h27M16.6 28h31M14.8 40h34.4M12.9 52h38.2"/>',
+  plataforma: '<rect x="8" y="52" width="48" height="6" rx="2"/><path d="M16 52L40 34M40 52L16 34M16 34L40 16M40 34L16 16"/><rect x="8" y="10" width="48" height="6" rx="2"/><path d="M12 10V3M52 10V3M12 6h40"/>',
+  guincho:    '<path d="M16 6v52M30 6v52M16 14l14 10M16 24l14-10M16 36l14 10M16 46l14-10M16 8h34"/><path d="M46 8v22"/><rect x="38" y="30" width="16" height="12" rx="2"/>',
+  gerador:    '<rect x="6" y="20" width="52" height="28" rx="4"/><path d="M16 20v-7h32v7M6 48v7M58 48v7M36 28h16M36 34h16M36 40h10"/><circle cx="20" cy="34" r="8"/><path d="M21 29l-4 6h4l-2 6 6-8h-4z"/>',
+  compressor: '<rect x="6" y="32" width="42" height="16" rx="8"/><rect x="20" y="14" width="18" height="14" rx="3"/><path d="M29 28v4M48 40h10"/><circle cx="14" cy="53" r="4"/><circle cx="40" cy="53" r="4"/><circle cx="54" cy="20" r="6"/><path d="M54 20l3-3"/>',
+  motobomba:  '<rect x="8" y="28" width="24" height="20" rx="4"/><circle cx="44" cy="40" r="10"/><path d="M44 30V16h12v-5M32 40h2M4 52h56"/>',
+  bomba:      '<rect x="22" y="22" width="20" height="26" rx="6"/><path d="M32 22V10h16M26 48v4h12v-4M28 30h8M28 36h8M6 58c4-3 8 3 12 0s8 3 12 0 8 3 12 0 8 3 12 0 4 1 4 0"/>',
+  lavadora:   '<rect x="8" y="18" width="26" height="30" rx="5"/><circle cx="21" cy="33" r="6"/><path d="M34 26c10 0 8 14 16 14M48 36h10M50 40l-2 10M58 34l4-2"/><circle cx="14" cy="53" r="4"/><circle cx="28" cy="53" r="4"/>',
+  carretel:   '<circle cx="28" cy="28" r="20"/><circle cx="28" cy="28" r="12"/><circle cx="28" cy="28" r="4"/><path d="M46 38c8 4 10 8 10 13"/><rect x="51" y="51" width="10" height="8" rx="1"/><path d="M54 59v3M58 59v3"/>',
+  mangueira:  '<ellipse cx="32" cy="20" rx="22" ry="9"/><ellipse cx="32" cy="32" rx="22" ry="9"/><ellipse cx="32" cy="44" rx="22" ry="9"/><path d="M54 32h7M10 44H3"/>',
+  container:  '<rect x="6" y="16" width="52" height="32" rx="2"/><path d="M14 16v32M22 16v32M30 16v32M38 16v32M46 16v32M6 48v5M58 48v5"/>',
+  banheiro:   '<path d="M16 8h32v48H16z"/><path d="M16 14h32"/><rect x="24" y="22" width="16" height="30"/><circle cx="37" cy="38" r="1.5"/>',
+  cacamba:    '<path d="M6 22h52l-6 26H12z"/><path d="M6 22v-5h52v5M16 30h32M14 48v5M50 48v5"/>',
+  carrinho:   '<path d="M10 20h34l-6 20H18z"/><circle cx="50" cy="46" r="8"/><path d="M10 20L3 10M18 40l-6 14M38 40l6 10M44 36l6 2"/>',
+  laser:      '<rect x="22" y="10" width="20" height="14" rx="3"/><circle cx="32" cy="17" r="3"/><path d="M32 24v10M32 34L18 58M32 34l14 24M32 34v24M4 17h14M46 17h14" /><path d="M4 17h14M46 17h14" stroke-dasharray="3 3"/>',
+  ventilador: '<circle cx="32" cy="24" r="18"/><circle cx="32" cy="24" r="3"/><path d="M32 24l8-10M32 24l-10-6M32 24l-4 12M32 24l10 8M32 42v12M20 56h24"/>',
+  generico:   '<rect x="8" y="24" width="48" height="28" rx="4"/><path d="M24 24v-6h16v6M8 36h48"/><rect x="28" y="33" width="8" height="6" rx="1"/>',
+};
+const ICONE_DE = {
+  'Furadeira':'furadeira','Furadeira de impacto':'furadeira','Parafusadeira':'furadeira',
+  'Martelete perfurador (SDS)':'martelete','Martelete rompedor':'rompedor',
+  'Serra mármore':'marmore','Serra circular':'serra','Policorte':'serra','Serra tico-tico':'ticotico',
+  'Esmerilhadeira':'esmeril','Lixadeira de parede':'lixadeira','Plaina elétrica':'plaina','Soprador térmico':'soprador',
+  'Betoneira 150L':'betoneira','Betoneira 400L':'betoneira','Vibrador de concreto':'vibrador','Régua vibratória':'regua',
+  'Compactador de solo (sapo)':'compactador','Placa vibratória':'placa','Alisadora de piso (helicóptero)':'alisadora','Cortadora de piso':'cortadora',
+  'Andaime tubular':'andaime','Andaime fachadeiro':'andaime','Escora metálica':'escora','Escada extensível':'escada','Plataforma elevatória':'plataforma','Guincho de coluna':'guincho',
+  'Gerador':'gerador','Compressor de ar':'compressor','Motobomba':'motobomba','Bomba submersa':'bomba','Lavadora de alta pressão':'lavadora',
+  'Extensão elétrica':'carretel','Cabo elétrico':'carretel','Mangueira de água':'mangueira','Mangueira de ar':'mangueira','Mangueira de nível':'mangueira','Mangote do vibrador':'vibrador',
+  'Container':'container','Banheiro químico':'banheiro','Caçamba':'cacamba','Carrinho de mão':'carrinho','Nível a laser':'laser','Ventilador industrial':'ventilador',
+};
+const iconeDe = nome => ICONE_DE[nome] || 'generico';
+const svgIcone = (nome, t = 48) => `<svg viewBox="0 0 64 64" width="${t}" height="${t}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONES[iconeDe(nome)]}</svg>`;
+
+let lista = carregar();
+let obrasPlat = carregarObras();
+let abaAtual = 'ativos';
+let fotosTmp = [];   // fotos da folha aberta, antes de salvar
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const brl = v => (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const num = v => { const s = String(v ?? '').trim(); if (!s) return 0; return parseFloat(s.includes(',') ? s.replace(/\./g,'').replace(',','.') : s) || 0; };
+const hoje = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
+const iso = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const dt = s => s ? new Date(s+'T00:00:00') : null;
+const fdt = s => s ? dt(s).toLocaleDateString('pt-BR') : '—';
+const dias = (a,b) => Math.round((b - a) / 86400000);
+const agora = () => new Date().toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
+const nomeEq = e => e.equip + (num(e.metros) ? ` (${num(e.metros)} m)` : '');
+
+function carregar(){ try { return JSON.parse(localStorage.getItem(CHAVE)) || []; } catch(e){ return []; } }
+function gravar(){ try { localStorage.setItem(CHAVE, JSON.stringify(lista)); } catch(e){ toast('Não foi possível salvar'); } }
+function carregarObras(){ try { return JSON.parse(localStorage.getItem(CHAVE_OBRAS)) || []; } catch(e){ return []; } }
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2600); }
+function abrirFolha(html){ $('folha').innerHTML='<div class="puxador"></div>'+html; $('veu').classList.remove('hidden'); }
+function fecharFolha(){ $('veu').classList.add('hidden'); $('folha').innerHTML=''; fotosTmp = []; }
+document.addEventListener('keydown', e => { if (e.key==='Escape') fecharFolha(); });
+
+// ── obras da plataforma ──
+async function buscarObras(){
+  const av = $('aviso-obras');
+  try {
+    const r = await fetch('/api/locados/obras', { cache:'no-store', credentials:'same-origin' });
+    if (r.status === 401) return bloquear('Entre com seu usuário e senha para usar o app.', false);
+    if (r.status === 403) return bloquear('Seu usuário não tem acesso ao app Locados. Peça ao administrador para liberar “App Locados” no seu cadastro.', true);
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+    desbloquear();
+    obrasPlat = (d.obras || []).map(o => ({ id:o.id, nome:o.name, local:o.location||'', status:o.status }));
+    try { localStorage.setItem(CHAVE_OBRAS, JSON.stringify(obrasPlat)); } catch(e){}
+    av.classList.add('hidden');
+    render();
+  } catch(e){
+    if (!obrasPlat.length){ av.textContent = 'Sem conexão com a Plataforma — não foi possível carregar as obras.'; av.classList.remove('hidden'); }
+  }
+}
+
+// Sem login (ou sem a permissão "App Locados") o app fica travado nesta tela.
+// Sem internet não trava: quem já entrou antes continua usando offline.
+function bloquear(msg, logado){
+  $('lista').innerHTML = `<div class="card" style="text-align:center;padding:24px 16px">
+    <img src="/locados-icon-192.png" alt="" style="width:72px;border-radius:16px;margin-bottom:10px">
+    <p style="margin:0 0 14px">${esc(msg)}</p>
+    ${logado ? '<button class="btn sec" style="width:100%" onclick="sair()">Entrar com outro usuário</button>'
+             : '<button class="btn pri" style="width:100%" onclick="abrirLogin()">Entrar</button>'}</div>`;
+  document.querySelectorAll('main > .card, .contagem, .barra, #aviso-obras').forEach(el => el.classList.add('hidden'));
+  document.body.dataset.travado = '1';
+}
+function desbloquear(){
+  if (!document.body.dataset.travado) return;
+  delete document.body.dataset.travado;
+  document.querySelectorAll('main > .card, .contagem, .barra').forEach(el => el.classList.remove('hidden'));
+  render();
+}
+async function sair(){
+  await fetch('/api/auth/logout', { method:'POST', credentials:'same-origin' }).catch(() => {});
+  fecharFolha(); bloquear('Entre com seu usuário e senha para usar o app.', false);
+}
+
+// Login aqui dentro (e não indo para /login): no app instalado do iPhone a
+// página /login abriria fora do app, com outros cookies.
+function abrirLogin(){
+  abrirFolha(`
+    <h2>Entrar</h2>
+    <form class="corpo" id="lg" onsubmit="entrar(event)">
+      <p style="margin:0 0 10px;color:var(--muted);font-size:13px">Use o mesmo e-mail e senha da Plataforma CMR.</p>
+      <input id="lg-email" class="field" type="email" placeholder="E-mail" autocomplete="username" required>
+      <input id="lg-senha" class="field mt" type="password" placeholder="Senha" autocomplete="current-password" required>
+      <div id="lg-erro" class="erro hidden"></div>
+    </form>
+    <div class="pe"><button class="btn sec" onclick="fecharFolha()">Cancelar</button><button class="btn pri" id="lg-btn" type="submit" form="lg">Entrar</button></div>`);
+  setTimeout(() => $('lg-email').focus(), 50);
+}
+async function entrar(ev){
+  ev.preventDefault();
+  const btn = $('lg-btn'), erro = $('lg-erro');
+  btn.disabled = true; btn.textContent = 'Entrando…'; erro.classList.add('hidden');
+  try {
+    const r = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'same-origin',
+      body: JSON.stringify({ email:$('lg-email').value, password:$('lg-senha').value }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || 'Não foi possível entrar');
+    fecharFolha(); toast('Bem-vindo' + (d.user?.name ? ', ' + d.user.name.split(' ')[0] : ''));
+    await buscarObras();
+  } catch(e){
+    erro.textContent = e.message === 'Failed to fetch' ? 'Sem conexão' : e.message; erro.classList.remove('hidden');
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+}
+
+// ── fotos (IndexedDB: chave = id da locação → {receb:[dataURL], dev:[dataURL]}) ──
+let _idb;
+function idb(){
+  return _idb ||= new Promise((ok, erro) => {
+    const r = indexedDB.open('cmr_locados', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('fotos');
+    r.onsuccess = () => ok(r.result); r.onerror = () => erro(r.error);
+  });
+}
+async function fotosGet(id){ const db = await idb(); return new Promise((ok, erro) => { const q = db.transaction('fotos').objectStore('fotos').get(id); q.onsuccess = () => ok(q.result || {receb:[],dev:[]}); q.onerror = () => erro(q.error); }); }
+async function fotosSet(id, v){ const db = await idb(); return new Promise((ok, erro) => { const t = db.transaction('fotos','readwrite'); v ? t.objectStore('fotos').put(v, id) : t.objectStore('fotos').delete(id); t.oncomplete = ok; t.onerror = () => erro(t.error); }); }
+async function fotosTodas(){ const db = await idb(); return new Promise((ok, erro) => { const out = {}; const q = db.transaction('fotos').objectStore('fotos').openCursor(); q.onsuccess = () => { const c = q.result; if (c){ out[c.key] = c.value; c.continue(); } else ok(out); }; q.onerror = () => erro(q.error); }); }
+
+// reduz para no máx. 1280px em JPEG — foto de celular cai de ~4 MB para ~200 KB
+function comprimir(file){
+  return new Promise((ok, erro) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const k = Math.min(1, 1280 / Math.max(img.width, img.height));
+      const c = document.createElement('canvas'); c.width = Math.round(img.width*k); c.height = Math.round(img.height*k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url); ok(c.toDataURL('image/jpeg', 0.7));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); erro(new Error('imagem inválida')); };
+    img.src = url;
+  });
+}
+async function addFotos(inp){
+  for (const f of inp.files){ try { fotosTmp.push(await comprimir(f)); } catch(e){ toast('Não deu para ler uma das fotos'); } }
+  inp.value = ''; desenharFotosTmp();
+}
+function tirarFoto(i){ fotosTmp.splice(i,1); desenharFotosTmp(); }
+function desenharFotosTmp(){
+  const el = $('fotos-tmp'); if (!el) return;
+  el.innerHTML = fotosTmp.map((f,i) => `<div class="foto"><img src="${f}"><button type="button" class="x" onclick="tirarFoto(${i})">✕</button></div>`).join('') +
+    `<label class="add-foto">📷<br>Foto<input type="file" accept="image/*" multiple class="hidden" onchange="addFotos(this)"></label>`;
+}
+function verFoto(src){
+  const volta = $('folha').innerHTML;
+  $('folha').innerHTML = `<div class="puxador"></div><div class="corpo"><img class="foto-grande" src="${src}"></div><div class="pe"><button class="btn sec" style="flex:1" id="vf-volta">Voltar</button></div>`;
+  $('vf-volta').onclick = () => { $('folha').innerHTML = volta; };
+}
+
+// ── cálculo ──
+function calc(e){
+  const ini = dt(e.retirada), fim = e.devolucao ? dt(e.devolucao) : hoje();
+  const d = ini ? Math.max(1, dias(ini, fim)) : 0;
+  const pd = (PER[e.periodo]||PER.mes)[1], q = num(e.qtd) || 1;
+  const custo = Math.ceil(d / pd) * num(e.valor) * q + num(e.frete);
+  const mes = num(e.valor) * q * 30 / pd;
+  let sit = 'ok', falta = null;
+  if (e.devolucao) sit = 'dev';
+  else if (e.previsao){ falta = dias(hoje(), dt(e.previsao)); sit = falta < 0 ? 'venc' : falta <= AVISO ? 'prox' : 'ok'; }
+  return { dias:d, custo, mes, sit, falta };
+}
+function textoSit(e, c){
+  if (c.sit==='dev') return 'Devolvido em ' + fdt(e.devolucao);
+  if (c.falta === null) return 'Sem previsão de devolução';
+  if (c.falta < 0) return `Vencido há ${-c.falta} dia${c.falta===-1?'':'s'} (${fdt(e.previsao)})`;
+  if (c.falta === 0) return 'Devolver hoje';
+  return `Devolver em ${c.falta} dia${c.falta===1?'':'s'} (${fdt(e.previsao)})`;
+}
+
+// ── tela ──
+function aba(a){ abaAtual = a; $('tab-ativos').classList.toggle('on', a==='ativos'); $('tab-dev').classList.toggle('on', a==='dev'); render(); }
+const ordena = arr => [...new Set(arr.filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+// Locadoras de sempre + as que já foram digitadas em "Outra"
+const LOCADORAS = ['LS Locações','Equiloc','Faciloc','Versátil','Teuto','Casa do Construtor','Mestre da Obra'];
+const locadoras = () => [...LOCADORAS, ...ordena(lista.map(e => e.locadora)).filter(l => !LOCADORAS.includes(l))];
+const solicitantes = () => ordena(lista.map(e => e.solicitante));
+
+function render(){
+  const sel = $('f-obra'), v = sel.value;
+  const nomes = ordena([...obrasPlat.filter(o => o.status !== 'completed').map(o => o.nome), ...lista.map(e => e.obra)]);
+  sel.innerHTML = '<option value="">Todas as obras</option>' + nomes.map(o => `<option>${esc(o)}</option>`).join('');
+  sel.value = nomes.includes(v) ? v : '';
+  const q = $('f-busca').value.trim().toLowerCase();
+  const base = lista.filter(e => (!sel.value || e.obra===sel.value) && (!q || [e.equip,e.locadora,e.patrimonio,e.solicitante].join(' ').toLowerCase().includes(q)));
+
+  const at = base.filter(e => !e.devolucao).map(e => [e, calc(e)]);
+  const venc = at.filter(([,c]) => c.sit==='venc').length;
+  $('contagem').innerHTML = `
+    <div><b>${at.reduce((s,[e])=>s+(num(e.qtd)||1),0)}</b><span>Na obra</span></div>
+    <div class="${venc?'a':''}"><b>${venc}</b><span>Vencidos</span></div>
+    <div><b>${brl(at.reduce((s,[,c])=>s+c.mes,0)).replace(',00','')}</b><span>Custo / mês</span></div>`;
+
+  let itens;
+  if (abaAtual==='ativos'){
+    const ord = { venc:0, prox:1, ok:2 };
+    itens = at.sort((a,b) => ord[a[1].sit]-ord[b[1].sit] || (a[0].previsao||'9').localeCompare(b[0].previsao||'9'));
+  } else {
+    itens = base.filter(e => e.devolucao).sort((a,b)=>b.devolucao.localeCompare(a.devolucao)).map(e => [e, calc(e)]);
+  }
+  if (!itens.length){
+    $('lista').innerHTML = `<div class="vazio">${abaAtual==='ativos' ? (lista.length ? 'Nenhum equipamento na obra.' : 'Nenhuma locação ainda.<br>Toque em <b>+ Nova locação</b> para começar.') : 'Nenhuma devolução registrada.'}</div>`;
+    return;
+  }
+  // agrupa por obra quando estiver em "Todas as obras"
+  const grupos = {};
+  itens.forEach(it => (grupos[sel.value ? '' : (it[0].obra||'Sem obra')] ||= []).push(it));
+  $('lista').innerHTML = Object.entries(grupos).map(([g, its]) =>
+    (g ? `<div class="grupo"><span>${esc(g)}</span><span>${brl(its.reduce((s,[,c])=>s+(abaAtual==='ativos'?c.mes:c.custo),0))}${abaAtual==='ativos'?'/mês':''}</span></div>` : '') +
+    its.map(([e,c]) => `
+      <button class="eq ${c.sit}" onclick="abrirDetalhe('${e.id}')">
+        <span class="eqimg" style="width:44px;height:44px">${svgIcone(e.equip, 30)}</span>
+        <div class="einfo">
+          <div class="enome">${esc(nomeEq(e))}${num(e.qtd)>1?`<span class="qtd">×${num(e.qtd)}</span>`:''}${e.nFotos?' <span class="qtd">📷</span>':''}</div>
+          <div class="esub">${esc(e.locadora||'—')}${e.solicitante?' · '+esc(e.solicitante):''}</div>
+          <div class="esit">${textoSit(e,c)}</div>
+        </div>
+        <div class="eval"><b>${brl(c.custo)}</b><small>${c.dias} dia${c.dias===1?'':'s'}</small></div>
+      </button>`).join('')
+  ).join('');
+}
+
+// ── detalhe ──
+async function abrirDetalhe(id){
+  const e = lista.find(x => x.id===id), c = calc(e);
+  const fotos = await fotosGet(id).catch(() => ({receb:[],dev:[]}));
+  const tiras = (arr, tit) => arr.length ? `<div class="lbl mt">${tit}</div><div class="fotos">${arr.map((f,i) => `<button class="foto" data-f="${tit}" data-i="${i}"><img src="${f}"></button>`).join('')}</div>` : '';
+  abrirFolha(`
+    <h2>${esc(nomeEq(e))}${num(e.qtd)>1?` <span class="qtd">×${num(e.qtd)}</span>`:''}</h2>
+    <div class="corpo">
+      <div class="det">
+        <span>Obra</span><b>${esc(e.obra||'—')}</b>
+        <span>Locadora</span><b>${esc(e.locadora||'—')}</b>
+        <span>Solicitante</span><b>${esc(e.solicitante||'—')}</b>
+        ${e.patrimonio?`<span>Patrimônio</span><b>${esc(e.patrimonio)}</b>`:''}
+        <span>Valor</span><b>${brl(num(e.valor))} · ${(PER[e.periodo]||PER.mes)[0]}</b>
+        ${num(e.frete)?`<span>Frete</span><b>${brl(num(e.frete))}</b>`:''}
+        <span>Retirada</span><b>${fdt(e.retirada)}</b>
+        <span>${e.devolucao?'Devolução':'Previsão'}</span><b>${fdt(e.devolucao||e.previsao)}</b>
+        ${e.obs?`<span>Obs.</span><b style="font-weight:500">${esc(e.obs)}</b>`:''}
+      </div>
+      <div class="resumo"><b>${c.dias}</b> dia${c.dias===1?'':'s'} · custo ${e.devolucao?'final':'até hoje'} <b>${brl(c.custo)}</b></div>
+      ${tiras(fotos.receb, 'Fotos do recebimento')}${tiras(fotos.dev, 'Fotos da devolução')}
+      ${(e.hist||[]).length?`<div class="lbl mt">Histórico</div>${e.hist.map(h=>`<div class="hist">${esc(h)}</div>`).join('')}`:''}
+    </div>
+    <div class="pe">
+      ${e.devolucao
+        ? `<button class="btn sec" onclick="desfazerDev('${id}')">Desfazer devolução</button>`
+        : `<button class="btn sec" onclick="abrirProrrogar('${id}')">Prorrogar</button><button class="btn pri" onclick="abrirDevolver('${id}')">Devolver</button>`}
+    </div>
+    <div class="pe" style="margin-top:6px">
+      <button class="btn del" onclick="excluir('${id}')">Excluir</button>
+      <span style="flex:1"></span>
+      <button class="link" onclick="abrirForm('${id}')">Editar</button>
+    </div>`);
+  $('folha').querySelectorAll('.foto[data-f]').forEach(b => b.onclick = () =>
+    verFoto((b.dataset.f.includes('devolução') ? fotos.dev : fotos.receb)[+b.dataset.i]));
+}
+
+// ── formulário ──
+function opcoesEquip(atual){
+  const noCat = ITENS.some(i => i.n === atual);
+  return '<option value="">— escolha —</option>' +
+    Object.entries(CATALOGO).map(([g, its]) => `<optgroup label="${esc(g)}">${its.map(i => { const n = typeof i==='string'?i:i.n; return `<option ${n===atual?'selected':''}>${esc(n)}</option>`; }).join('')}</optgroup>`).join('') +
+    `<option value="${OUTRO}" ${atual && !noCat ? 'selected' : ''}>Outro (digitar)</option>`;
+}
+function opcoesObra(atual){
+  const ativas = obrasPlat.filter(o => o.status !== 'completed');
+  const tem = ativas.some(o => o.nome === atual);
+  return '<option value="">— escolha a obra —</option>' +
+    (atual && !tem ? `<option selected>${esc(atual)}</option>` : '') +
+    ativas.map(o => `<option ${o.nome===atual?'selected':''} value="${esc(o.nome)}">${esc(o.nome)}${o.local?' — '+esc(o.local):''}</option>`).join('');
+}
+function trocouEquip(){
+  const v = $('fm').cat.value;
+  $('eq-outro').classList.toggle('hidden', v !== OUTRO);
+  $('fm').equipOutro.required = v === OUTRO;
+  const prev = $('eq-prev');
+  prev.classList.toggle('hidden', !v);
+  if (v) prev.innerHTML = `<span class="eqimg" style="width:76px;height:76px">${svgIcone(v === OUTRO ? '' : v, 56)}</span><div><b>${esc(v === OUTRO ? 'Outro equipamento' : v)}</b><small>Imagem ilustrativa</small></div>`;
+  const m = pedeMetro(v);
+  $('eq-metros').classList.toggle('hidden', !m);
+  $('fm').metros.required = m;
+}
+async function abrirForm(id){
+  const e = id ? lista.find(x => x.id===id) : { qtd:1, periodo:'mes', retirada:iso(hoje()), obra:$('f-obra').value };
+  const noCat = ITENS.some(i => i.n === e.equip);
+  fotosTmp = id ? (await fotosGet(id).catch(() => ({receb:[]}))).receb.slice() : [];
+  const semObras = !obrasPlat.length;
+  abrirFolha(`
+    <h2>${id?'Editar locação':'Nova locação'}</h2>
+    <form class="corpo" id="fm" onsubmit="salvar(event,'${id||''}')">
+      <div class="lbl">Equipamento</div>
+      <div class="row">
+        <select class="field" name="cat" required onchange="trocouEquip()" style="flex:3">${opcoesEquip(e.equip)}</select>
+        <input class="field" name="qtd" type="number" min="1" value="${esc(e.qtd)}" title="Quantidade">
+      </div>
+      <div id="eq-prev" class="eqprev hidden"></div>
+      <input class="field mt ${e.equip && !noCat ? '' : 'hidden'}" id="eq-outro" name="equipOutro" placeholder="Nome do equipamento" value="${esc(noCat ? '' : e.equip)}">
+      <div id="eq-metros" class="${pedeMetro(e.equip) ? '' : 'hidden'}">
+        <div class="lbl mt">Metragem (m)</div>
+        <input class="field" name="metros" inputmode="decimal" placeholder="Ex.: 30" value="${esc(e.metros)}">
+      </div>
+      <div class="lbl mt">Obra</div>
+      ${semObras
+        ? `<input class="field" name="obra" required value="${esc(e.obra)}" placeholder="Obras da Plataforma não carregadas — digite">`
+        : `<select class="field" name="obra" required>${opcoesObra(e.obra)}</select>`}
+      <div class="row mt">
+        <div><div class="lbl">Locadora</div><select class="field" name="locadora" required onchange="$('loc-outra').classList.toggle('hidden', this.value!==OUTRO); $('fm').locOutra.required = this.value===OUTRO">
+          <option value="">— escolha —</option>${locadoras().map(l => `<option ${l===e.locadora?'selected':''}>${esc(l)}</option>`).join('')}<option value="${OUTRO}">Outra (digitar)</option></select></div>
+        <div><div class="lbl">Solicitante</div><input class="field" name="solicitante" list="dl-sol" required value="${esc(e.solicitante)}" placeholder="Quem pediu"></div>
+      </div>
+      <input class="field mt hidden" id="loc-outra" name="locOutra" placeholder="Nome da locadora">
+      <div class="row mt">
+        <div><div class="lbl">Valor (R$)</div><input class="field" name="valor" inputmode="decimal" required placeholder="0,00" value="${esc(e.valor)}"></div>
+        <div><div class="lbl">Cobrança</div><select class="field" name="periodo">${Object.entries(PER).map(([k,v])=>`<option value="${k}" ${k===e.periodo?'selected':''}>${v[0]}</option>`).join('')}</select></div>
+      </div>
+      <div class="row mt">
+        <div><div class="lbl">Retirada</div><input class="field" name="retirada" type="date" required value="${esc(e.retirada)}"></div>
+        <div><div class="lbl">Devolver até</div><input class="field" name="previsao" type="date" value="${esc(e.previsao)}"></div>
+      </div>
+      <div class="row mt">
+        <div><div class="lbl">Frete (R$)</div><input class="field" name="frete" inputmode="decimal" placeholder="ida + volta" value="${esc(e.frete)}"></div>
+        <div><div class="lbl">Patrimônio / nº</div><input class="field" name="patrimonio" value="${esc(e.patrimonio)}"></div>
+      </div>
+      <div class="lbl mt">Fotos do recebimento</div>
+      <div class="fotos" id="fotos-tmp"></div>
+      <div class="lbl mt">Observação</div>
+      <textarea class="field" name="obs">${esc(e.obs)}</textarea>
+      <datalist id="dl-sol">${solicitantes().map(o=>`<option value="${esc(o)}">`).join('')}</datalist>
+    </form>
+    <div class="pe"><button class="btn sec" onclick="fecharFolha()">Cancelar</button><button class="btn pri" type="submit" form="fm">Salvar</button></div>`);
+  desenharFotosTmp(); trocouEquip();
+}
+async function salvar(ev, id){
+  ev.preventDefault();
+  const d = Object.fromEntries(new FormData($('fm')).entries());
+  Object.keys(d).forEach(k => d[k] = d[k].trim());
+  d.equip = d.cat === OUTRO ? d.equipOutro : d.cat;
+  if (!pedeMetro(d.equip)) d.metros = '';
+  if (d.locadora === OUTRO) d.locadora = d.locOutra;
+  delete d.cat; delete d.equipOutro; delete d.locOutra;
+  if (d.previsao && d.previsao < d.retirada) return toast('“Devolver até” não pode ser antes da retirada');
+  const o = obrasPlat.find(x => x.nome === d.obra); d.obraId = o ? o.id : '';
+  let e;
+  if (id){
+    e = lista.find(x => x.id===id);
+    if (e.previsao !== d.previsao && e.previsao) (e.hist ||= []).push(`${agora()} — previsão alterada de ${fdt(e.previsao)} para ${fdt(d.previsao)}`);
+    Object.assign(e, d);
+  } else {
+    e = { id: Date.now().toString(36)+Math.random().toString(36).slice(2,6), ...d, hist:[`${agora()} — locação cadastrada${d.solicitante?' (solicitante: '+d.solicitante+')':''}`] };
+    lista.push(e);
+  }
+  try {
+    const f = await fotosGet(e.id); f.receb = fotosTmp.slice(); await fotosSet(e.id, f);
+    e.nFotos = f.receb.length + f.dev.length;
+  } catch(err){ toast('Locação salva, mas as fotos não (sem espaço?)'); }
+  gravar(); fecharFolha(); render(); toast('Salvo');
+}
+
+// ── devolver / prorrogar ──
+function abrirDevolver(id){
+  const e = lista.find(x => x.id===id);
+  fotosTmp = [];
+  abrirFolha(`
+    <h2>Devolver ${esc(nomeEq(e))}</h2>
+    <div class="corpo">
+      <div class="lbl">Data da devolução</div>
+      <input id="dv-data" class="field" type="date" value="${iso(hoje())}" min="${e.retirada}" oninput="prevDev('${id}')">
+      <div class="lbl mt">Frete total (R$)</div>
+      <input id="dv-frete" class="field" inputmode="decimal" value="${esc(e.frete)}" oninput="prevDev('${id}')">
+      <div class="lbl mt">Fotos da devolução</div>
+      <div class="fotos" id="fotos-tmp"></div>
+      <div class="lbl mt">Observação</div>
+      <input id="dv-obs" class="field" placeholder="Ex.: conferido por..., nota nº...">
+      <div class="resumo" id="dv-res"></div>
+    </div>
+    <div class="pe"><button class="btn sec" onclick="abrirDetalhe('${id}')">Voltar</button><button class="btn pri" onclick="confirmarDev('${id}')">Confirmar devolução</button></div>`);
+  desenharFotosTmp(); prevDev(id);
+}
+function prevDev(id){
+  const e = lista.find(x => x.id===id), c = calc({ ...e, devolucao:$('dv-data').value || iso(hoje()), frete:$('dv-frete').value });
+  $('dv-res').innerHTML = `<b>${c.dias}</b> dia${c.dias===1?'':'s'} · custo final <b>${brl(c.custo)}</b>`;
+}
+async function confirmarDev(id){
+  const e = lista.find(x => x.id===id), data = $('dv-data').value;
+  if (!data || data < e.retirada) return toast('Data de devolução inválida');
+  e.devolucao = data; e.frete = $('dv-frete').value.trim();
+  const obs = $('dv-obs').value.trim();
+  (e.hist ||= []).push(`${agora()} — devolvido em ${fdt(data)}, custo final ${brl(calc(e).custo)}${obs?'. '+obs:''}`);
+  if (fotosTmp.length){
+    try { const f = await fotosGet(id); f.dev = [...f.dev, ...fotosTmp]; await fotosSet(id, f); e.nFotos = f.receb.length + f.dev.length; }
+    catch(err){ toast('Devolução salva, mas as fotos não'); }
+  }
+  gravar(); fecharFolha(); render(); toast('Devolução registrada');
+}
+function desfazerDev(id){
+  const e = lista.find(x => x.id===id);
+  (e.hist ||= []).push(`${agora()} — devolução de ${fdt(e.devolucao)} desfeita`);
+  e.devolucao = ''; gravar(); fecharFolha(); render(); toast('Voltou para “Na obra”');
+}
+function abrirProrrogar(id){
+  const e = lista.find(x => x.id===id);
+  abrirFolha(`
+    <h2>Prorrogar ${esc(nomeEq(e))}</h2>
+    <div class="corpo">
+      <div class="lbl">Nova data para devolver</div>
+      <input id="pr-data" class="field" type="date" min="${iso(hoje())}" value="${esc(e.previsao)}">
+      <div class="lbl mt">Motivo</div>
+      <input id="pr-mot" class="field">
+    </div>
+    <div class="pe"><button class="btn sec" onclick="abrirDetalhe('${id}')">Voltar</button><button class="btn pri" onclick="confirmarProrrogar('${id}')">Salvar</button></div>`);
+}
+function confirmarProrrogar(id){
+  const e = lista.find(x => x.id===id), data = $('pr-data').value, mot = $('pr-mot').value.trim();
+  if (!data) return toast('Escolha a nova data');
+  (e.hist ||= []).push(`${agora()} — prorrogado de ${fdt(e.previsao)} para ${fdt(data)}${mot?'. '+mot:''}`);
+  e.previsao = data; gravar(); abrirDetalhe(id); render(); toast('Prorrogado');
+}
+function excluir(id){
+  if (!confirm('Excluir esta locação e as fotos dela? Não dá para desfazer.')) return;
+  lista = lista.filter(x => x.id!==id); gravar(); fotosSet(id, null).catch(()=>{}); fecharFolha(); render(); toast('Excluído');
+}
+
+// ── resumo WhatsApp ──
+function textoResumo(){
+  const obra = $('f-obra').value;
+  const at = lista.filter(e => !e.devolucao && (!obra || e.obra===obra)).map(e => [e, calc(e)]);
+  const linhas = [`*Equipamentos locados CMR*`, `🗓️ ${hoje().toLocaleDateString('pt-BR')}`];
+  const grupos = {};
+  at.forEach(it => (grupos[it[0].obra||'Sem obra'] ||= []).push(it));
+  Object.entries(grupos).sort().forEach(([g, its]) => {
+    linhas.push('', `🚧 *${g}*`);
+    its.forEach(([e,c]) => linhas.push(`• ${num(e.qtd)>1?num(e.qtd)+'× ':''}${nomeEq(e)} — ${e.locadora||'s/ locadora'}${c.sit==='venc'?' ⚠️ *VENCIDO* desde '+fdt(e.previsao):e.previsao?' — até '+fdt(e.previsao):''}`));
+  });
+  if (!at.length) linhas.push('', 'Nenhum equipamento locado.');
+  const venc = at.filter(([,c]) => c.sit==='venc').length;
+  linhas.push('', `Total: ${at.reduce((s,[e])=>s+(num(e.qtd)||1),0)} itens · ${brl(at.reduce((s,[,c])=>s+c.mes,0))}/mês${venc?` · ${venc} vencido(s)`:''}`);
+  return linhas.join('\n');
+}
+function abrirResumo(){
+  abrirFolha(`<h2>Resumo para WhatsApp</h2><div class="corpo"><div class="previa">${esc(textoResumo())}</div></div>
+    <div class="pe"><button class="btn sec" onclick="copiar()">Copiar</button><button class="btn zap" onclick="location.href='https://wa.me/?text='+encodeURIComponent(textoResumo())">Enviar</button></div>`);
+}
+function copiar(){ navigator.clipboard.writeText(textoResumo()).then(()=>toast('Copiado'), ()=>toast('Não foi possível copiar')); }
+
+// ── relatório (abre página A4 pronta para imprimir / salvar em PDF) ──
+function abrirRelatorio(){
+  const obraAtual = $('f-obra').value;
+  const nomes = ordena(lista.map(e => e.obra));
+  const ini = new Date(hoje().getFullYear(), hoje().getMonth(), 1);
+  abrirFolha(`
+    <h2>Relatório de equipamentos</h2>
+    <div class="corpo">
+      <div class="lbl">Obra</div>
+      <select id="rl-obra" class="field"><option value="">Todas as obras</option>${nomes.map(o => `<option ${o===obraAtual?'selected':''}>${esc(o)}</option>`).join('')}</select>
+      <div class="lbl mt">Situação</div>
+      <select id="rl-sit" class="field" onchange="$('rl-per').classList.toggle('hidden', this.value==='ativos')">
+        <option value="ativos">Na obra hoje</option>
+        <option value="dev">Devolvidos no período</option>
+        <option value="todos">Todos com movimento no período</option>
+      </select>
+      <div id="rl-per" class="row mt hidden">
+        <div><div class="lbl">De</div><input id="rl-de" class="field" type="date" value="${iso(ini)}"></div>
+        <div><div class="lbl">Até</div><input id="rl-ate" class="field" type="date" value="${iso(hoje())}"></div>
+      </div>
+      <label class="row mt" style="align-items:center;font-size:14px"><input id="rl-fotos" type="checkbox" style="flex:none;width:20px;height:20px"> <span>Incluir fotos de recebimento e devolução</span></label>
+    </div>
+    <div class="pe"><button class="btn sec" onclick="fecharFolha()">Cancelar</button><button class="btn pri" onclick="gerarRelatorio()">Gerar relatório</button></div>`);
+}
+async function gerarRelatorio(){
+  const obra = $('rl-obra').value, sit = $('rl-sit').value, comFotos = $('rl-fotos').checked;
+  const de = $('rl-de').value || '0000-00-00', ate = $('rl-ate').value || '9999-12-31';
+  const janela = window.open('', '_blank');   // abre já no clique, senão o bloqueador de pop-up barra
+  if (!janela) return toast('Libere pop-ups para abrir o relatório');
+  const sel = lista.filter(e => {
+    if (obra && e.obra !== obra) return false;
+    if (sit === 'ativos') return !e.devolucao;
+    if (sit === 'dev') return e.devolucao && e.devolucao >= de && e.devolucao <= ate;
+    // todos: esteve locado em algum dia do período
+    return e.retirada <= ate && (!e.devolucao || e.devolucao >= de);
+  }).map(e => [e, calc(e)]);
+  const fotos = comFotos ? await fotosTodas().catch(() => ({})) : {};
+
+  const grupos = {};
+  sel.forEach(it => (grupos[it[0].obra||'Sem obra'] ||= []).push(it));
+  const tit = { ativos:'Equipamentos na obra', dev:'Equipamentos devolvidos', todos:'Equipamentos locados' }[sit];
+  const periodo = sit === 'ativos' ? `Posição em ${hoje().toLocaleDateString('pt-BR')}` : `Período de ${fdt(de)} a ${fdt(ate)}`;
+  const sitTxt = (e,c) => c.sit==='dev' ? 'Devolvido' : c.sit==='venc' ? `<b class="v">Vencido ${-c.falta}d</b>` : c.sit==='prox' ? 'Vence em breve' : 'Na obra';
+  const totQtd = sel.reduce((s,[e]) => s+(num(e.qtd)||1), 0), totCusto = sel.reduce((s,[,c]) => s+c.custo, 0);
+  const totMes = sel.filter(([e]) => !e.devolucao).reduce((s,[,c]) => s+c.mes, 0);
+  const venc = sel.filter(([,c]) => c.sit==='venc').length;
+
+  const corpo = Object.entries(grupos).sort().map(([g, its]) => `
+    <h2>${esc(g)} <small>${its.length} locação(ões) · ${brl(its.reduce((s,[,c])=>s+c.custo,0))}</small></h2>
+    <table>
+      <thead><tr><th>Equipamento</th><th class="n">Qtd</th><th>Locadora</th><th>Solicitante</th><th>Retirada</th><th>Previsão</th><th>Devolução</th><th class="n">Dias</th><th class="n">Valor</th><th class="n">Custo</th><th>Situação</th></tr></thead>
+      <tbody>${its.sort((a,b)=>(a[0].retirada||'').localeCompare(b[0].retirada||'')).map(([e,c]) => `
+        <tr><td><b>${esc(nomeEq(e))}</b>${e.patrimonio?`<br><small>${esc(e.patrimonio)}</small>`:''}${e.obs?`<br><small>${esc(e.obs)}</small>`:''}</td>
+        <td class="n">${num(e.qtd)||1}</td><td>${esc(e.locadora||'—')}</td><td>${esc(e.solicitante||'—')}</td>
+        <td>${fdt(e.retirada)}</td><td>${fdt(e.previsao)}</td><td>${fdt(e.devolucao)}</td><td class="n">${c.dias}</td>
+        <td class="n">${brl(num(e.valor))}<br><small>${(PER[e.periodo]||PER.mes)[0]}</small></td><td class="n"><b>${brl(c.custo)}</b></td><td>${sitTxt(e,c)}</td></tr>
+        ${comFotos && fotos[e.id] && (fotos[e.id].receb.length || fotos[e.id].dev.length) ? `<tr class="fts"><td colspan="11">
+          ${fotos[e.id].receb.map(f => `<figure><img src="${f}"><figcaption>Recebimento</figcaption></figure>`).join('')}
+          ${fotos[e.id].dev.map(f => `<figure><img src="${f}"><figcaption>Devolução</figcaption></figure>`).join('')}</td></tr>` : ''}`).join('')}
+      </tbody>
+    </table>`).join('');
+
+  janela.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>${tit} — CMR</title>
+  <style>
+    @page{size:A4 landscape;margin:12mm}
+    body{font:11px/1.35 -apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#151515;margin:0;padding:16px}
+    .cab{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #C8102E;padding-bottom:8px;margin-bottom:12px}
+    .cab h1{font-size:18px;margin:0;color:#C8102E}.cab p{margin:2px 0 0;color:#6b6b72}
+    .kp{display:flex;gap:10px;margin-bottom:14px}.kp div{flex:1;border:1px solid #e3e3e8;border-radius:8px;padding:8px 10px}
+    .kp b{display:block;font-size:16px}.kp span{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:#6b6b72;font-weight:700}
+    h2{font-size:13px;margin:16px 0 6px;break-after:avoid}h2 small{font-weight:400;color:#6b6b72;font-size:11px}
+    table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #e3e3e8;padding:5px 6px;text-align:left;vertical-align:top}
+    th{background:#f2f2f4;font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:#555}
+    .n{text-align:right;white-space:nowrap}small{color:#6b6b72}.v{color:#C8102E}
+    tr{break-inside:avoid}.fts td{padding:4px 6px 10px}
+    figure{display:inline-block;margin:0 8px 0 0;text-align:center}figure img{height:110px;border-radius:4px;display:block}figcaption{font-size:9px;color:#6b6b72}
+    .rod{margin-top:18px;color:#6b6b72;font-size:10px;text-align:right}
+    .acao{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px}
+    .bt.volta{background:#f0f0f3;color:#151515}
+    .bt{background:#C8102E;color:#fff;border:0;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer}
+    @media print{.acao{display:none}body{padding:0}}
+  </style></head><body>
+  <div class="acao"><button class="bt volta" onclick="voltar()">← Voltar ao app</button><button class="bt" onclick="print()">Imprimir / PDF</button></div>
+  <script>
+    // O relatório abre em janela própria: fecha e volta para o app. Se o celular
+    // não deixar fechar (app instalado no iPhone), abre o app nesta janela.
+    function voltar(){ try { if (window.opener) window.close(); } catch(e){} setTimeout(function(){ location.href = ${JSON.stringify(location.origin + '/locados.html')}; }, 300); }
+  <\/script>
+  <div class="cab"><div><h1>${tit}</h1><p>CMR Empreendimentos · ${esc(obra || 'Todas as obras')}</p></div><p>${periodo}</p></div>
+  <div class="kp">
+    <div><b>${sel.length}</b><span>Locações</span></div>
+    <div><b>${totQtd}</b><span>Itens</span></div>
+    <div><b>${brl(totCusto)}</b><span>Custo total</span></div>
+    ${sit !== 'dev' ? `<div><b>${brl(totMes)}</b><span>Custo / mês (ativos)</span></div><div><b class="v">${venc}</b><span>Vencidos</span></div>` : ''}
+  </div>
+  ${corpo || '<p>Nenhum equipamento nesse filtro.</p>'}
+  <div class="rod">Gerado em ${agora()} · Locados CMR</div>
+  </body></html>`);
+  janela.document.close();
+  fecharFolha();
+}
+
+// ── configurações (⚙): tema, minha conta, usuários (admin), dados ──
+const CHAVE_TEMA = 'cmr_locados_tema';
+const URL_APP = location.origin + '/locados.html';
+let cfg = { eu:null, usuarios:[], podeCriar:false, erro:'' };
+
+function temaAtual(){ return document.documentElement.dataset.theme || 'auto'; }
+function mudarTema(t){
+  if (t === 'auto'){ delete document.documentElement.dataset.theme; try { localStorage.removeItem(CHAVE_TEMA); } catch(e){} }
+  else { document.documentElement.dataset.theme = t; try { localStorage.setItem(CHAVE_TEMA, t); } catch(e){} }
+  document.querySelectorAll('#seg-tema button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+}
+async function carregarUsuarios(){
+  try {
+    const r = await fetch('/api/locados/usuarios', { cache:'no-store', credentials:'same-origin' });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || 'HTTP '+r.status);
+    cfg = { eu:d.eu, usuarios:d.usuarios||[], podeCriar:!!d.podeCriar, erro:'' };
+  } catch(e){ cfg.erro = e.message === 'Failed to fetch' ? 'Sem conexão' : e.message; }
+}
+const iniciais = n => String(n||'?').trim().split(/\s+/).map(p => p[0]).slice(0,2).join('').toUpperCase();
+
+async function abrirConfig(){
+  abrirFolha(`<h2>Configurações</h2><div class="corpo" id="cfg-corpo"><div class="vazio">Carregando…</div></div>
+    <div class="pe"><button class="btn sec" style="flex:1" onclick="fecharFolha()">Fechar</button></div>`);
+  await carregarUsuarios();
+  desenharConfig();
+}
+function desenharConfig(){
+  const el = $('cfg-corpo'); if (!el) return;
+  const t = temaAtual(), eu = cfg.eu;
+  el.innerHTML = `
+    <div class="sec-tit" style="margin-top:0">Tema</div>
+    <div class="seg" id="seg-tema">
+      ${[['auto','Automático'],['light','☀ Claro'],['dark','☾ Escuro']].map(([k,n]) => `<button data-t="${k}" class="${k===t?'on':''}" onclick="mudarTema('${k}')">${n}</button>`).join('')}
+    </div>
+
+    <div class="sec-tit">Minha conta</div>
+    ${eu ? `<div class="usu"><div class="av">${esc(iniciais(eu.nome))}</div><div class="pinfo"><b>${esc(eu.nome)}${eu.admin?'<span class="tag-adm">ADMIN</span>':''}</b><small>${esc(eu.email)}</small></div></div>
+      <div class="row mt"><button class="btn sec" onclick="abrirMinhaSenha()">Trocar minha senha</button><button class="btn del" style="flex:none" onclick="sair()">Sair</button></div>`
+         : `<p style="color:var(--muted);font-size:13px;margin:0">${esc(cfg.erro || 'Não conectado.')}</p>`}
+
+    ${eu && eu.admin ? `
+      <div class="sec-tit">Usuários do app</div>
+      ${cfg.podeCriar ? '' : '<div class="aviso" style="text-align:left">Para criar logins e gerar senhas pelo app, falta configurar a chave <b>SUPABASE_SERVICE_ROLE_KEY</b> na Vercel.</div>'}
+      <button class="btn pri" style="width:100%" onclick="abrirNovoUsuario()">+ Novo usuário</button>
+      <div class="mt">${cfg.usuarios.map(u => `
+        <div class="usu ${u.ativo?'':'off'}"><div class="av">${esc(iniciais(u.nome))}</div>
+          <div class="pinfo"><b>${esc(u.nome)}${u.admin?'<span class="tag-adm">ADMIN</span>':''}</b><small>${esc(u.email)}${u.ativo?'':' · desativado'}</small></div>
+          <button class="mini" data-email="${esc(u.email)}" data-nome="${esc(u.nome)}" onclick="novaSenha(this.dataset.email,this.dataset.nome)">Nova senha</button>
+          ${u.email !== eu.email ? `<button class="mini" onclick="ativarUsuario('${u.id}',${!u.ativo})">${u.ativo?'Desativar':'Ativar'}</button>` : ''}
+          ${u.email !== eu.email && !u.admin ? `<button class="mini" title="Excluir" style="color:var(--off)" data-nome="${esc(u.nome)}" onclick="excluirUsuario('${u.id}',this.dataset.nome)">🗑</button>` : ''}
+        </div>`).join('') || '<p style="color:var(--muted);font-size:13px">Nenhum usuário com acesso ao app ainda.</p>'}</div>` : ''}
+
+    <div class="sec-tit">Dados deste aparelho</div>
+    <p style="margin:0 0 10px;color:var(--muted);font-size:13px">As locações e fotos ficam salvas neste aparelho (${lista.length} locações). Baixe um backup de vez em quando — é também o jeito de levar para outro aparelho.</p>
+    <button class="btn sec" style="width:100%" onclick="baixarBackup()">Baixar backup (com fotos)</button>
+    <label class="btn sec mt" style="width:100%;display:flex;align-items:center;justify-content:center">Restaurar backup<input type="file" accept=".json" class="hidden" onchange="restaurar(this)"></label>
+    <button class="btn sec mt" style="width:100%" onclick="baixarCSV()">Exportar planilha (CSV)</button>
+    <button class="btn sec mt" style="width:100%" onclick="buscarObras().then(()=>toast('Obras atualizadas: '+obrasPlat.length))">Atualizar obras da Plataforma</button>`;
+}
+
+async function acaoUsuarios(corpo){
+  const r = await fetch('/api/locados/usuarios', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'same-origin', body:JSON.stringify(corpo) });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || 'Erro '+r.status);
+  return d;
+}
+function abrirNovoUsuario(){
+  abrirFolha(`<h2>Novo usuário</h2>
+    <form class="corpo" id="nu" onsubmit="criarUsuario(event)">
+      <div class="lbl">Nome</div><input class="field" name="nome" required placeholder="Nome e sobrenome">
+      <div class="lbl mt">E-mail (login)</div><input class="field" name="email" type="email" required autocapitalize="off">
+      <div class="lbl mt">WhatsApp</div><input class="field" name="tel" type="tel" inputmode="tel" placeholder="(42) 99999-9999">
+      <p style="color:var(--muted);font-size:12px;margin:8px 0 0">O app cria o login com uma senha provisória e abre o WhatsApp com a mensagem pronta. A pessoa entra só no app Locados.</p>
+      <div id="nu-erro" class="erro hidden"></div>
+    </form>
+    <div class="pe"><button class="btn sec" onclick="abrirConfig()">Voltar</button><button class="btn pri" id="nu-btn" type="submit" form="nu">Criar e enviar</button></div>`);
+}
+async function criarUsuario(ev){
+  ev.preventDefault();
+  const f = Object.fromEntries(new FormData($('nu')).entries()), btn = $('nu-btn'), erro = $('nu-erro');
+  btn.disabled = true; btn.textContent = 'Criando…'; erro.classList.add('hidden');
+  try {
+    const d = await acaoUsuarios({ acao:'criar', nome:f.nome, email:f.email });
+    mostrarMensagemAcesso(f.nome, f.email.trim().toLowerCase(), d.senha, f.tel, d.jaTinhaLogin ? 'O e-mail já tinha login (ex.: Diário de Obras): a senha dele não mudou e o app foi liberado.' : 'Usuário criado.');
+  } catch(e){ erro.textContent = e.message; erro.classList.remove('hidden'); btn.disabled = false; btn.textContent = 'Criar e enviar'; }
+}
+// Senha legível para ditar/digitar (sem 0/O, 1/l/I)
+function gerarSenha(){
+  const c = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789', v = crypto.getRandomValues(new Uint32Array(10));
+  return Array.from(v, n => c[n % c.length]).join('');
+}
+function novaSenha(email, nome){
+  abrirFolha(`<h2>Alterar senha</h2>
+    <form class="corpo" id="ns" onsubmit="salvarSenhaUsuario(event)">
+      <p style="margin:0 0 10px;font-size:14px"><b>${esc(nome)}</b><br><span style="color:var(--muted);font-size:12px">${esc(email)}</span></p>
+      <div class="lbl">Nova senha (mín. 6 caracteres)</div>
+      <div class="row"><input class="field" id="ns-senha" type="text" minlength="6" required autocomplete="off" autocapitalize="off" spellcheck="false" style="font-family:monospace;font-size:16px" value="${gerarSenha()}">
+        <button type="button" class="btn sec" style="flex:none;min-height:44px" onclick="$('ns-senha').value=gerarSenha()" title="Gerar outra">🔄</button></div>
+      <p style="color:var(--muted);font-size:12px;margin:8px 0 0">Digite a senha que quiser ou use a sugerida. A senha atual deixa de funcionar. Se a pessoa ainda não tem login, ele é criado agora.</p>
+      <div id="ns-erro" class="erro hidden"></div>
+      <input type="hidden" id="ns-email" value="${esc(email)}"><input type="hidden" id="ns-nome" value="${esc(nome)}">
+    </form>
+    <div class="pe"><button class="btn sec" onclick="abrirConfig()">Voltar</button><button class="btn pri" id="ns-btn" type="submit" form="ns">Salvar e enviar</button></div>`);
+}
+async function salvarSenhaUsuario(ev){
+  ev.preventDefault();
+  const email = $('ns-email').value, nome = $('ns-nome').value, senha = $('ns-senha').value.trim(), btn = $('ns-btn'), erro = $('ns-erro');
+  if (senha.length < 6){ erro.textContent = 'A senha precisa ter pelo menos 6 caracteres'; erro.classList.remove('hidden'); return; }
+  btn.disabled = true; btn.textContent = 'Salvando…'; erro.classList.add('hidden');
+  try {
+    const d = await acaoUsuarios({ acao:'senha', email, senha });
+    mostrarMensagemAcesso(nome, email, d.senha, '', d.loginCriado ? 'Login criado.' : 'Senha alterada.');
+  } catch(e){ erro.textContent = e.message; erro.classList.remove('hidden'); btn.disabled = false; btn.textContent = 'Salvar e enviar'; }
+}
+async function ativarUsuario(id, ativo){
+  try { await acaoUsuarios({ acao:'ativo', id, ativo }); await carregarUsuarios(); desenharConfig(); toast(ativo ? 'Usuário ativado' : 'Usuário desativado'); }
+  catch(e){ toast(e.message); }
+}
+async function excluirUsuario(id, nome){
+  if (!confirm(`Excluir ${nome} do app Locados? A pessoa perde o acesso e não dá para desfazer.`)) return;
+  try {
+    const d = await acaoUsuarios({ acao:'excluir', id });
+    await carregarUsuarios(); desenharConfig();
+    toast(d.removido === 'acesso' ? `${nome} perdeu o acesso ao app (continua na Plataforma)` : `${nome} excluído`);
+  } catch(e){ toast(e.message); }
+}
+function textoAcesso(nome, email, senha, troca){
+  const primeiro = String(nome).trim().split(/\s+/)[0];
+  return `Olá ${primeiro}! 👋\n\nSeu acesso ao app *Locados CMR* (equipamentos locados) ${troca ? 'teve a senha alterada' : 'foi criado'}.\n\n📲 App: ${URL_APP}\n📧 Login: ${email}\n` +
+    (senha ? `🔑 Senha: ${senha}\n\nAbra o link no celular, toque em *Instalar* e depois em *Entrar*. No primeiro acesso, troque a senha em ⚙ Configurações → *Trocar minha senha*.`
+           : `🔑 Senha: a mesma que você já usa.\n\nAbra o link no celular, toque em *Instalar* e depois em *Entrar*.`);
+}
+function linkWhats(tel, txt){
+  let d = String(tel||'').replace(/\D/g,''); if (d && !d.startsWith('55')) d = '55' + d;
+  return `https://wa.me/${d}?text=${encodeURIComponent(txt)}`;
+}
+function mostrarMensagemAcesso(nome, email, senha, tel, titulo){
+  const txt = textoAcesso(nome, email, senha, /alterada/i.test(titulo));
+  window._msgAcesso = txt;
+  abrirFolha(`<h2>${esc(titulo)}</h2><div class="corpo">
+      ${senha ? `<div class="lbl">Senha provisória</div><div class="field" style="font-family:monospace;font-size:18px;letter-spacing:1px;user-select:all">${esc(senha)}</div>` : ''}
+      <div class="lbl mt">Mensagem</div><div class="previa">${esc(txt)}</div>
+      <div class="lbl mt">WhatsApp de quem vai receber</div><input id="ma-tel" class="field" type="tel" inputmode="tel" value="${esc(tel)}" placeholder="(42) 99999-9999 — em branco escolhe no WhatsApp">
+    </div>
+    <div class="pe"><button class="btn sec" onclick="navigator.clipboard.writeText(window._msgAcesso).then(()=>toast('Copiado'))">Copiar</button>
+      <button class="btn zap" onclick="location.href=linkWhats($('ma-tel').value, window._msgAcesso)">Enviar no WhatsApp</button></div>
+    <div class="pe" style="margin-top:6px"><button class="link" style="width:100%" onclick="abrirConfig()">Voltar às configurações</button></div>`);
+}
+function abrirMinhaSenha(){
+  abrirFolha(`<h2>Trocar minha senha</h2>
+    <form class="corpo" id="ms" onsubmit="trocarMinhaSenha(event)">
+      <input class="field" id="ms-1" type="password" placeholder="Nova senha (mín. 6)" autocomplete="new-password" minlength="6" required>
+      <input class="field mt" id="ms-2" type="password" placeholder="Repita a nova senha" autocomplete="new-password" minlength="6" required>
+      <div id="ms-erro" class="erro hidden"></div>
+    </form>
+    <div class="pe"><button class="btn sec" onclick="abrirConfig()">Voltar</button><button class="btn pri" type="submit" form="ms">Salvar</button></div>`);
+}
+async function trocarMinhaSenha(ev){
+  ev.preventDefault();
+  const a = $('ms-1').value, b = $('ms-2').value, erro = $('ms-erro');
+  if (a !== b){ erro.textContent = 'As senhas não conferem'; erro.classList.remove('hidden'); return; }
+  try { await acaoUsuarios({ acao:'minha-senha', senha:a }); toast('Senha alterada'); abrirConfig(); }
+  catch(e){ erro.textContent = e.message; erro.classList.remove('hidden'); }
+}
+
+// ── backup ──
+function baixar(nome, txt, tipo){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:tipo})); a.download=nome; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
+async function baixarBackup(){
+  const fotos = await fotosTodas().catch(() => ({}));
+  baixar(`locados-cmr-${iso(hoje())}.json`, JSON.stringify({ versao:2, lista, fotos }), 'application/json');
+}
+function baixarCSV(){
+  const q = v => `"${String(v??'').replace(/"/g,'""')}"`, n = v => (v||0).toFixed(2).replace('.',',');
+  const cab = ['Obra','Equipamento','Metros','Qtd','Locadora','Solicitante','Patrimônio','Valor','Cobrança','Retirada','Devolver até','Devolução','Dias','Frete','Custo','Observação'];
+  const lin = lista.map(e => { const c = calc(e); return [e.obra,e.equip,e.metros,e.qtd,e.locadora,e.solicitante,e.patrimonio,n(num(e.valor)),(PER[e.periodo]||PER.mes)[0],fdt(e.retirada),fdt(e.previsao),fdt(e.devolucao),c.dias,n(num(e.frete)),n(c.custo),e.obs].map(q).join(';'); });
+  baixar(`locados-cmr-${iso(hoje())}.csv`, '﻿'+[cab.map(q).join(';'),...lin].join('\r\n'), 'text/csv;charset=utf-8');
+}
+function restaurar(inp){
+  const f = inp.files[0]; if (!f) return;
+  f.text().then(async t => {
+    const d = JSON.parse(t);
+    const nova = Array.isArray(d) ? d : d.lista;   // backup antigo era só a lista
+    if (!Array.isArray(nova)) throw new Error('arquivo inválido');
+    if (!confirm(`Substituir os dados deste aparelho por este backup (${nova.length} locações)?`)) return;
+    lista = nova; gravar();
+    for (const [id, v] of Object.entries(d.fotos || {})) await fotosSet(id, v);
+    fecharFolha(); render(); toast('Backup restaurado');
+  }).catch(e => toast('Não foi possível restaurar: '+e.message)).finally(()=>inp.value='');
+}
+
+// ── instalação na tela inicial ──
+// Escopo '/locados' de propósito: o service worker não mexe no resto da Plataforma.
+let promptInstalar = null;
+if ('serviceWorker' in navigator){
+  window.addEventListener('load', () => navigator.serviceWorker.register('/locados-sw.js', { scope:'/locados' }).catch(() => {}));
+}
+const instalado = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+const ehIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+window.addEventListener('beforeinstallprompt', ev => {
+  ev.preventDefault(); promptInstalar = ev;
+  if (!instalado()) $('banner-inst').classList.remove('hidden');
+});
+window.addEventListener('appinstalled', () => { $('banner-inst').classList.add('hidden'); promptInstalar = null; toast('App instalado'); });
+async function instalar(){
+  if (promptInstalar){
+    promptInstalar.prompt();
+    const r = await promptInstalar.userChoice.catch(() => null);
+    if (r && r.outcome === 'accepted') $('banner-inst').classList.add('hidden');
+    promptInstalar = null;
+    return;
+  }
+  abrirFolha('<h2>Instalar na tela inicial</h2><div class="corpo">'
+    + (ehIOS()
+      ? '<ol class="passos"><li>Toque em <b>Compartilhar</b> (o quadrado com a seta para cima), na barra de baixo do Safari.</li>'
+        + '<li>Role e toque em <b>Adicionar à Tela de Início</b>.</li>'
+        + '<li>Toque em <b>Adicionar</b>. O ícone “Locados” aparece junto com os outros apps.</li></ol>'
+      : '<ol class="passos"><li>Toque no menu <b>⋮</b> do Chrome, no canto de cima.</li>'
+        + '<li>Toque em <b>Instalar app</b> (ou "Adicionar à tela inicial").</li>'
+        + '<li>Confirme. O ícone “Locados” aparece junto com os outros apps.</li></ol>')
+    + '<p style="color:var(--muted);font-size:13px">Depois de instalado ele abre em tela cheia, sem barra de navegador, e funciona mesmo sem sinal na obra.</p>'
+    + '</div><div class="pe"><button class="btn pri" onclick="fecharFolha()">Entendi</button></div>');
+}
+// iPhone não dispara beforeinstallprompt: mostra o botão com as instruções.
+if (ehIOS() && !instalado()) $('banner-inst').classList.remove('hidden');
+
+render();
+buscarObras();
+</script>
+</body>
+</html>
